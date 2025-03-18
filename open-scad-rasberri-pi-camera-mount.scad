@@ -17,7 +17,7 @@ tilt_angle = 30;  // Angle to tilt the screw thread downward (adjustable)
 // Parameters for base
 base_width = a + r + 10;  // Width (x-direction)
 base_depth = t + 20;      // Depth (y-direction)
-base_height = 2;          // Height of the base (z-direction)
+base_height = 3;          // Height of the base (z-direction)
 screw_diameter = 3.2;     // Diameter for M3 screws
 screw_offset = 5;         // Distance from edges for screw holes
 
