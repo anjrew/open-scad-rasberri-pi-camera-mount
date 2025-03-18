@@ -2,14 +2,14 @@
 r = 2.4;   // minor radius
 d = 0.6;   // thread depth
 p = 1;     // pitch
-h = 6;     // height
+h = 15;     // height
 n = 100;   // number of segments
 w = 0.1;   // width of thread segment
 
 // Parameters for triangular plate
 a = 50;     // length of radial leg
-t = 12;     // thickness
-triangle_height = 65;
+t = 13;     // thickness
+triangle_height = 73;
 mount_length = 16;  // Base length before tilt adjustment
 theta = 0;  // angle around cylinder (horizontal rotation)
 tilt_angle = 30;  // Angle to tilt the screw thread downward (adjustable)
@@ -34,7 +34,7 @@ module thread_segment(theta) {
 // Total rotation for thread
 total_theta = 360 * (h / p);
 
-// Module for triangular plate
+// Module for triangular_plate
 module triangular_plate(a, t, theta, tilt_angle) {
     rotate([0, 0, theta]) {
         rotate([90, 0, 0])
@@ -80,27 +80,39 @@ module mount_exclude(tilt_angle) {
     // Adjust dimensions for tilt
     adjusted_width = (r * 2 + 2) / cos(tilt_angle);  // Ensure x-width covers thread diameter + clearance
     adjusted_height = h / cos(tilt_angle) + 2;       // Ensure z-height covers thread height + buffer
-    translate([-3, 0, mount_height -3])                  // Position at mount_height
+    translate([-3, 0, mount_height -3])              // Position at mount_height
     rotate([0, -tilt_angle, 0])                      // Tilt to match screw thread
-    cube([adjusted_width + 10, t + 10, adjusted_height + 10]);      // Adjusted size
+    cube([adjusted_width + 10, t + 10, adjusted_height + 10]);  // Adjusted size
 }
 
-// Main assembly
-union() {
-    // Tilted screw thread centered in mount_exclude
-    translate([-t/2 + mount_length/2 -2, 0, mount_height])  // Center in exclusion
-    rotate([0, -tilt_angle, 0])                          // Tilt downward
-    screw_thread();
+module main_body(){
     
-    // Triangular plate with adjusted mount exclusion
-    difference() {
-        translate([-t/2, t/2, 0])
-        triangular_plate(a, t, theta, tilt_angle);
-        translate([-t/2 + mount_length/2 - (r + 1), -t/2, 0])  // Center exclusion under thread
-        mount_exclude(tilt_angle);
+    // Main assembly
+    union() {
+        // Triangular plate with mount exclusion and subtracted screw thread
+        difference() {
+            translate([-t/2, t/2, 0])
+            triangular_plate(a, t, theta, tilt_angle);
+            translate([-t/2 + mount_length/2 - (r + 1), -t/2, 0])
+            mount_exclude(tilt_angle);
+        }
+    
+        // Base with mounting holes
+        translate([a/2, 0, 0])
+        base_with_holes();
     }
+}
+
+
+
+difference(){
     
-    // Base with mounting holes
-    translate([a/2, 0, 0])
-    base_with_holes();
+
+    
+        main_body();
+    
+         // Subtract the screw thread to create a threaded hole
+        translate([-t/2 + mount_length/2 + 6, 0, mount_height - 10])
+        rotate([0, -tilt_angle, 0])
+        screw_thread();
 }
